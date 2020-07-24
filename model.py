@@ -1,3 +1,4 @@
+
 zasedena_polja = {(4, 2): ('b', 'kralj'), (2, 2): ('b', 'tekač'), (2, 3): ('č', 'kralj'), (5, 7): ('b', 'kmet')}
 
 zasedena_polja_beli = {polje for polje in zasedena_polja if zasedena_polja[polje][0] == 'b'}
@@ -216,9 +217,10 @@ def poteze_kralj(polje, barva):
     for i in [-1, 1, 0]:
         for j in [-1, 1, 0]:
             if not j == 0 == i:
-                if not (v + i, s + j) in svoja_polja + množica + ogrožena_polja and 9 > v + i > 0 and 9 > s + j > 0:
+
+                if not (v + i, s + j) in svoja_polja.union(množica, ogrožena_polja) and 9 > v + i > 0 and 9 > s + j > 0:
                     množica.update({(v + i, s + j)})
-                if not (v - i, s - j) in svoja_polja + množica + ogrožena_polja and 9 > v - i > 0 and 9 > s - j > 0:
+                if not (v - i, s - j) in svoja_polja.union(množica, ogrožena_polja) and 9 > v - i > 0 and 9 > s - j > 0:
                     množica.update({(v - i, s - j)})
     return množica
 
@@ -259,3 +261,5 @@ def ogrožena_polja_za(barva):
 
 ogrožena_polja_za_bele = ogrožena_polja_za('b')
 ogrožena_polja_za_črne = ogrožena_polja_za('č')
+
+

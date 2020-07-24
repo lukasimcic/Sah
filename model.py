@@ -1,6 +1,6 @@
 
-zasedena_polja = {(1, 3): ('č', 'kraljica'), (4, 2): ('b', 'kralj'), (2, 2): ('b', 'tekač'), (2, 3): ('č', 'kralj'), (5, 7): ('b', 'kmet'), (6, 6): ('č', 'kmet')}
-
+zasedena_polja = {}
+#(1, 3): ('č', 'kraljica'), (4, 2): ('b', 'kralj'), (2, 2): ('b', 'tekač'), (2, 3): ('č', 'kralj'), (5, 7): ('b', 'kmet'), (6, 6): ('č', 'kmet')
 zasedena_polja_beli = {polje for polje in zasedena_polja if zasedena_polja[polje][0] == 'b'}
 zasedena_polja_črni = {polje for polje in zasedena_polja if zasedena_polja[polje][0] == 'č'}
 
@@ -336,3 +336,24 @@ def zasedenost_centra(barva):
             if (v, s) in polja:
                 zasedenost += 1
     return zasedenost
+
+
+# nariše mrežo namesto koordinat:
+
+def mreža(množica):
+    mreža = '  __   __   __   __   __   __   __   __ '
+    i = 8
+    while i > 0:
+        v_vrstici = []
+        vrstica = '\n\n|'
+        for (v, s) in množica:
+            if v == i:
+                v_vrstici.append(s)
+        for j in range(1, 9):
+            if j in v_vrstici:
+                vrstica += ' XX |'
+            else:
+                vrstica += '    |'
+        mreža += vrstica + '\n  __   __   __   __   __   __   __   __ '
+        i -= 1
+    print(mreža)

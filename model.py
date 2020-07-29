@@ -1,6 +1,6 @@
 
-zasedena_polja = {}
-#(1, 3): ('č', 'kraljica'), (4, 2): ('b', 'kralj'), (2, 2): ('b', 'tekač'), (2, 3): ('č', 'kralj'), (5, 7): ('b', 'kmet'), (6, 6): ('č', 'kmet')
+zasedena_polja = {(6, 8): ('č', 'P'), (1, 3): ('č', 'Q'), (4, 2): ('b', 'K'), (2, 2): ('b', 'B'), (2, 3): ('č', 'K'), (5, 7): ('b', 'P'), (6, 6): ('č', 'P')}
+
 zasedena_polja_beli = {polje for polje in zasedena_polja if zasedena_polja[polje][0] == 'b'}
 zasedena_polja_črni = {polje for polje in zasedena_polja if zasedena_polja[polje][0] == 'č'}
 
@@ -30,22 +30,22 @@ def na_katerih_poljih_je(figura, barva):  # to funkcijo bom potreboval kasneje
 
 
 def poteze(figura, polje, barva):
-    if figura == 'kmet':
-        return poteze_kmet(polje, barva)
-    if figura == 'trdnjava':
-        return poteze_trdnjava(polje, barva)
-    if figura == 'tekač':
-        return poteze_tekač(polje, barva)
-    if figura == 'konj':
-        return poteze_konj(polje, barva)
-    if figura == 'kraljica':
-        return poteze_kraljica(polje, barva)
+    if figura == 'P':
+        return poteze_P(polje, barva)
+    if figura == 'R':
+        return poteze_R(polje, barva)
+    if figura == 'B':
+        return poteze_B(polje, barva)
+    if figura == 'N':
+        return poteze_N(polje, barva)
+    if figura == 'Q':
+        return poteze_Q(polje, barva)
     else:
-        return poteze_kralj(polje, barva)
+        return poteze_K(polje, barva)
 
 
 
-def poteze_kmet_črni(polje):
+def poteze_P_črni(polje):
     (v, s) = polje
     množica = set()
 
@@ -71,14 +71,14 @@ def poteze_kmet_črni(polje):
 
 
 
-def poteze_kmet_beli(polje):
+def poteze_P_beli(polje):
     (v, s) = polje
     množica = set()
 
     if (v + 1, s - 1) in zasedena_polja_črni:
-        množica.update({(v - 1, s - 1)})
+        množica.update({(v + 1, s - 1)})
     if (v + 1, s + 1) in zasedena_polja_črni:
-        množica.update({(v - 1, s + 1)})
+        množica.update({(v + 1, s + 1)})
     
     if (v + 1, s) in zasedena_polja_beli:
         return množica
@@ -97,15 +97,15 @@ def poteze_kmet_beli(polje):
 
 
 
-def poteze_kmet(polje, barva):
+def poteze_P(polje, barva):
     if barva == 'b':
-        return poteze_kmet_beli(polje)
+        return poteze_P_beli(polje)
     else:
-        return poteze_kmet_črni(polje)
+        return poteze_P_črni(polje)
 
 
 
-def poteze_trdnjava(polje, barva):
+def poteze_R(polje, barva):
     (v, s) = polje
     množica = set()
     nasprotnikova_polja = nasprotnikova_polja_od(barva)
@@ -151,7 +151,7 @@ def poteze_trdnjava(polje, barva):
     
 
 
-def poteze_konj(polje, barva):
+def poteze_N(polje, barva):
     (v, s) = polje
     množica = set()
     svoja_polja = svoja_polja_od(barva)
@@ -170,7 +170,7 @@ def poteze_konj(polje, barva):
 
 
 
-def poteze_tekač(polje, barva):
+def poteze_B(polje, barva):
     (v, s) = polje
     množica = set()
     nasprotnikova_polja = nasprotnikova_polja_od(barva)
@@ -216,8 +216,8 @@ def poteze_tekač(polje, barva):
 
 
 
-def poteze_kraljica(polje, barva):
-    return poteze_tekač(polje, barva).union(poteze_trdnjava(polje, barva))
+def poteze_Q(polje, barva):
+    return poteze_B(polje, barva).union(poteze_R(polje, barva))
 
 
 # da vidimo, kam se kralj ne sme premakniti, moramo pogledati ogroženost figur (rabimo tudi še za naprej):
@@ -233,7 +233,7 @@ def računa_ogrožena_polja_za(barva):
         (v, s) = polje[0], polje[1]
         barva, figura = zasedena_polja[polje]
 
-        if figura == 'kmet':
+        if figura == 'P':
             if barva == 'b':
                 množica.update({(v + 1, s + 1)})
                 množica.update({(v + 1, s - 1)})
@@ -241,7 +241,7 @@ def računa_ogrožena_polja_za(barva):
                 množica.update({(v - 1, s + 1)})
                 množica.update({(v - 1, s - 1)})
 
-        elif figura == 'kralj':
+        elif figura == 'K':
             for i in [-1, 1, 0]:
                 for j in [-1, 1, 0]:
                     if not j == 0 == i:
@@ -265,7 +265,7 @@ def ogrožena_polja_za(barva):
     else:
         return ogrožena_polja_za_črne
 
-def poteze_kralj(polje, barva):
+def poteze_K(polje, barva):
     (v, s) = polje
     množica = set()
     svoja_polja = svoja_polja_od(barva)
@@ -293,34 +293,34 @@ def ogroženost(barva):
             ogroženost += 1
     return ogroženost
 
-vrednosti_figur = {'kmet': 1,
-                   'konj': 3,
-                   'tekač': 3,
-                   'trdnjava': 5,
-                   'kraljica': 9}
+vrednosti_figur = {'P': 1,
+                   'N': 3,
+                   'B': 3,
+                   'R': 5,
+                   'Q': 9}
 
 def vrednost(barva):
     vrednost = 0
     polja = svoja_polja_od(barva)
     for polje in polja:
         figura = zasedena_polja[polje][1]
-        if figura != 'kralj':
+        if figura != 'K':
             vrednost += vrednosti_figur[figura]
     return vrednost
 
 def zaprtost_kralja(barva):
-    polje = na_katerih_poljih_je('kralj', barva).pop()
-    return 8 - len(poteze_kralj(polje, barva))
+    polje = na_katerih_poljih_je('K', barva).pop()
+    return 8 - len(poteze_K(polje, barva))
 
 def ogroženost_kralja(barva):
-    polje = na_katerih_poljih_je('kralj', barva).pop()
+    polje = na_katerih_poljih_je('K', barva).pop()
     if polje in ogrožena_polja_za(barva):
         return 1
     else:
         return 0
 
 def ogroženost_kraljice(barva):
-    polje = na_katerih_poljih_je('kraljica', barva)
+    polje = na_katerih_poljih_je('Q', barva)
     if polje == set():
         return 0 
     if polje.pop() in ogrožena_polja_za(barva):
@@ -337,6 +337,29 @@ def zasedenost_centra(barva):
                 zasedenost += 1
     return zasedenost
 
+# ogroženost: 0 - 16
+# vrednost: 0 - 39
+# zaprtost_kralja: 0 - 8
+# ogroženost_kralja: 0 - 1
+# ogroženost_kraljice: 0 - 1
+# zasedenost_centra: 0 - 16
+
+def evalvacija(barva):
+    if barva == 'b':
+        nasprotna_barva = 'č'
+    else:
+        nasprotna_barva = 'b'
+    evalvacija = 0
+
+    evalvacija += ogroženost(barva) - ogroženost(nasprotna_barva)
+    + (vrednost(barva) - vrednost(nasprotna_barva)) * 3 / 4
+    + (zaprtost_kralja(barva) - zaprtost_kralja(nasprotna_barva)) * 2
+    + (ogroženost_kralja(barva) - ogroženost_kralja(nasprotna_barva)) * 16
+    + (ogroženost_kraljice(barva) - ogroženost_kraljice(nasprotna_barva)) * 8
+    + (zasedenost_centra(barva) - zasedenost_centra(nasprotna_barva)) / 2
+
+    return evalvacija
+
 
 # nariše mrežo namesto koordinat:
 
@@ -344,16 +367,43 @@ def mreža(množica):
     mreža = '  __   __   __   __   __   __   __   __ '
     i = 8
     while i > 0:
-        v_vrstici = []
+        v_vrstici = {}
         vrstica = '\n\n|'
         for (v, s) in množica:
             if v == i:
-                v_vrstici.append(s)
+                v_vrstici[s] = (množica[(v, s)])
         for j in range(1, 9):
             if j in v_vrstici:
-                vrstica += ' XX |'
+                if type(množica) == 'set':
+                    vrstica += ' XX |'
+                else:
+                    vrstica += ' ' + v_vrstici[j][0] + v_vrstici[j][1] + ' |'
             else:
                 vrstica += '    |'
         mreža += vrstica + '\n  __   __   __   __   __   __   __   __ '
         i -= 1
     print(mreža)
+
+mreža(zasedena_polja)
+
+def evalvacija_spremembe(zasedena_polja, staro_polje, novo_polje, figura, barva):
+    kopija_zasedenih_polj = zasedena_polja.copy()
+    zasedena_polja.pop(staro_polje)
+    zasedena_polja[novo_polje] = (barva, figura)
+    
+    ocena = evalvacija(barva)
+    
+    zasedena_polja = kopija_zasedenih_polj
+    return ocena
+
+def najboljša_poteza(barva):
+    slovar = {}
+    for polje in svoja_polja_od(barva):
+        slovar[polje] = {}
+        figura = zasedena_polja[polje][1]
+        for poteza in poteze(figura, polje, barva):
+            ocena = evalvacija_spremembe(zasedena_polja, polje, poteza, figura, barva)
+            slovar[polje][poteza] = ocena
+    return slovar
+
+najboljša_poteza('b')

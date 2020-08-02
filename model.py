@@ -1,3 +1,9 @@
+ZMAGA = 'W'
+PORAZ = 'X'
+REMI = 'O'
+
+NAPAČNA_POTEZA = 'xx'
+
 # začetno stanje:
 
 zasedena_polja = { (1, 1): ('b', 'R'), (1, 2): ('b', 'N'), (1, 3): ('b', 'B'), (1, 4): ('b', 'Q'), (1, 5): ('b', 'K'), (1, 6): ('b', 'B'), (1, 7): ('b', 'N'), (1, 8): ('b', 'R'),
@@ -343,8 +349,6 @@ class igra:
         self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
         self.težavnost = težavnost
 
-        mreža(self.postavitev)
-
     def najboljša_poteza(self):
         najboljša_ocena = self.težavnost * (-100)
         iskano_polje, iskana_poteza = 0, 0
@@ -437,10 +441,10 @@ class igra:
         # najprej poteza, ki jo naredi igralec
 
         if prejšnje_polje not in self.nasprotnikova_polja or novo_polje not in poteze(self.postavitev[prejšnje_polje][1], prejšnje_polje, self.nasprotnikova_barva, self.nasprotnikova_polja, self.svoja_polja, self.postavitev):
-            return 'NAPAČNA_POTEZA'
+            return NAPAČNA_POTEZA
 
         elif prejšnje_polje == 0:
-            return 'REMI'
+            return REMI
 
         else:
 
@@ -455,52 +459,27 @@ class igra:
             self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
 
             if zmaga(self.nasprotnikova_barva, zasedena_polja):
-                print('PORAZ')
+                return PORAZ
             if zmaga(self.barva, zasedena_polja):
-                print('ZMAGA')
+                return ZMAGA
 
-            mreža(self.postavitev)
+    def poteza_računalnika(self):       
 
-            # še poteza računalnika
+        (prejšnje_polje, novo_polje) = self.najboljša_poteza()
+        (c, d) = self.postavitev.pop(prejšnje_polje)
+        
+        if d == 'P' and novo_polje[0] == 8 or novo_polje[0] == 1:
+            self.postavitev[novo_polje] = (c, 'Q')  # kmet se spremeni v kraljico  
+        else:
+            self.postavitev[novo_polje] = (c, d)
+        
+        self.svoja_polja = {polje for polje in self.postavitev if self.postavitev[polje][0] == self.barva}
+        self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
+        if zmaga(self.nasprotnikova_barva, zasedena_polja):
+            return PORAZ
+        if zmaga(self.barva, zasedena_polja):
+            return ZMAGA
 
-            (prejšnje_polje, novo_polje) = self.najboljša_poteza()
-            (c, d) = self.postavitev.pop(prejšnje_polje)
-            
-            if d == 'P' and novo_polje[0] == 8 or novo_polje[0] == 1:
-                self.postavitev[novo_polje] = (c, 'Q')  # kmet se spremeni v kraljico  
-            else:
-                self.postavitev[novo_polje] = (c, d)
-            
-            self.svoja_polja = {polje for polje in self.postavitev if self.postavitev[polje][0] == self.barva}
-            self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
-
-            if zmaga(self.nasprotnikova_barva, zasedena_polja):
-                print('PORAZ')
-            if zmaga(self.barva, zasedena_polja):
-                print('ZMAGA')
-
-            mreža(self.postavitev)
-
-def mreža(množica):
-    mreža = '  __   __   __   __   __   __   __   __ '
-    i = 8
-    while i > 0:
-        v_vrstici = dict()
-        vrstica = '\n\n|'
-        for (v, s) in množica:
-            if v == i:
-                if type(množica) == set:
-                    v_vrstici[s] = 0
-                else:
-                    v_vrstici[s] = (množica[(v, s)])
-        for j in range(1, 9):
-            if j in v_vrstici:
-                if type(množica) == set:
-                    vrstica += ' XX |'
-                else:
-                    vrstica += ' ' + v_vrstici[j][0] + v_vrstici[j][1] + ' |'
-            else:
-                vrstica += '    |'
-        mreža += vrstica + '\n  __   __   __   __   __   __   __   __ '
-        i -= 1
-    print(mreža)
+def nova_igra(barva, težavnost):
+    nasprotnikova_barva = {'b', 'č'}.difference({barva}).pop()
+    return igra(nasprotnikova_barva, težavnost)

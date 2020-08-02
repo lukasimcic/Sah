@@ -5,7 +5,7 @@ zasedena_polja = { (1, 1): ('b', 'R'), (1, 2): ('b', 'N'), (1, 3): ('b', 'B'), (
 (7, 1): ('č', 'P'), (7, 2): ('č', 'P'), (7, 3): ('č', 'P'), (7, 4): ('č', 'P'), (7, 5): ('č', 'P'), (7, 6): ('č', 'P'), (7, 7): ('č', 'P'), (7, 8): ('č', 'P'),
 (8, 1): ('č', 'R'), (8, 2): ('č', 'N'), (8, 3): ('č', 'B'), (8, 4): ('č', 'Q'), (8, 5): ('č', 'K'), (8, 6): ('č', 'B'), (8, 7): ('č', 'N'), (8, 8): ('č', 'R')}
 
-# razredi figur:
+# razredi figur (vsi imajo metodo poteze, ki vrne množico vseh možnih potez iz danega polja, kralj in kmet imata še metodo ogroža, ki vrne množico vseh polj, ki ju ogrožata):
 
 class R:
 
@@ -151,11 +151,9 @@ class P:
         if barva == 'b':
             self.premik = 1
             self.začetek = 2
-            self.konec = 7
         else:
             self.premik = - 1
             self.začetek = 7
-            self.konec = 2
 
     def ogroža(self):
 
@@ -173,9 +171,6 @@ class P:
         if (self.v + self.premik, self.s) in zasedena_polja:
             return množica
 
-        if self.v == self.konec:
-            množica.update({(self.konec + self.premik, self.s)})
-            # se spremeni v kraljico
         if self.v == self.začetek:
             množica.update({(self.začetek + self.premik, self.s)})
             if (self.začetek + self.premik) not in self.svoja_polja:
@@ -442,12 +437,20 @@ class igra:
         # najprej poteza, ki jo naredi igralec
 
         if prejšnje_polje not in self.nasprotnikova_polja or novo_polje not in poteze(self.postavitev[prejšnje_polje][1], prejšnje_polje, self.nasprotnikova_barva, self.nasprotnikova_polja, self.svoja_polja, self.postavitev):
-                return 'NAPAČNA_POTEZA'
+            return 'NAPAČNA_POTEZA'
+
+        elif prejšnje_polje == 0:
+            return 'REMI'
 
         else:
 
             (a, b) = self.postavitev.pop(prejšnje_polje)
-            self.postavitev[novo_polje] = (a, b)
+
+            if b == 'P' and novo_polje[0] == 8 or novo_polje[0] == 1:
+                self.postavitev[novo_polje] = (a, 'Q')  # kmet se spremeni v kraljico  
+            else:
+                self.postavitev[novo_polje] = (a, b)
+
             self.svoja_polja = {polje for polje in self.postavitev if self.postavitev[polje][0] == self.barva}
             self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
 
@@ -462,7 +465,12 @@ class igra:
 
             (prejšnje_polje, novo_polje) = self.najboljša_poteza()
             (c, d) = self.postavitev.pop(prejšnje_polje)
-            self.postavitev[novo_polje] = (c, d)
+            
+            if d == 'P' and novo_polje[0] == 8 or novo_polje[0] == 1:
+                self.postavitev[novo_polje] = (c, 'Q')  # kmet se spremeni v kraljico  
+            else:
+                self.postavitev[novo_polje] = (c, d)
+            
             self.svoja_polja = {polje for polje in self.postavitev if self.postavitev[polje][0] == self.barva}
             self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
 

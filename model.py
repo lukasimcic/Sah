@@ -1,19 +1,31 @@
+BELI = 'b'
+ČRNI = 'č'
+
+KMET = 'P'
+TRDNJAVA = 'R'
+KONJ = 'N'
+TEKAČ = 'B'
+KRALJICA = 'Q'
+KRALJ = 'K'
+
 ZMAGA = 'W'
 PORAZ = 'X'
 REMI = 'O'
 
 NAPAČNA_POTEZA = 'xx'
 
+ZAČETEK = 'S'
+
 # začetno stanje:
 
-zasedena_polja = { (1, 1): ('b', 'R'), (1, 2): ('b', 'N'), (1, 3): ('b', 'B'), (1, 4): ('b', 'Q'), (1, 5): ('b', 'K'), (1, 6): ('b', 'B'), (1, 7): ('b', 'N'), (1, 8): ('b', 'R'),
-(2, 1): ('b', 'P'), (2, 2): ('b', 'P'), (2, 3): ('b', 'P'), (2, 4): ('b', 'P'), (2, 5): ('b', 'P'), (2, 6): ('b', 'P'), (2, 7): ('b', 'P'), (2, 8): ('b', 'P'),
-(7, 1): ('č', 'P'), (7, 2): ('č', 'P'), (7, 3): ('č', 'P'), (7, 4): ('č', 'P'), (7, 5): ('č', 'P'), (7, 6): ('č', 'P'), (7, 7): ('č', 'P'), (7, 8): ('č', 'P'),
-(8, 1): ('č', 'R'), (8, 2): ('č', 'N'), (8, 3): ('č', 'B'), (8, 4): ('č', 'Q'), (8, 5): ('č', 'K'), (8, 6): ('č', 'B'), (8, 7): ('č', 'N'), (8, 8): ('č', 'R')}
+zasedena_polja = { (1, 1): (BELI, TRDNJAVA), (1, 2): (BELI, KONJ), (1, 3): (BELI, TEKAČ), (1, 4): (BELI, KRALJICA), (1, 5): (BELI, KRALJ), (1, 6): (BELI, TEKAČ), (1, 7): (BELI, KONJ), (1, 8): (BELI, TRDNJAVA),
+(2, 1): (BELI, KMET), (2, 2): (BELI, KMET), (2, 3): (BELI, KMET), (2, 4): (BELI, KMET), (2, 5): (BELI, KMET), (2, 6): (BELI, KMET), (2, 7): (BELI, KMET), (2, 8): (BELI, KMET),
+(7, 1): (ČRNI, KMET), (7, 2): (ČRNI, KMET), (7, 3): (ČRNI, KMET), (7, 4): (ČRNI, KMET), (7, 5): (ČRNI, KMET), (7, 6): (ČRNI, KMET), (7, 7): (ČRNI, KMET), (7, 8): (ČRNI, KMET),
+(8, 1): (ČRNI, TRDNJAVA), (8, 2): (ČRNI, KONJ), (8, 3): (ČRNI, TEKAČ), (8, 4): (ČRNI, KRALJICA), (8, 5): (ČRNI, KRALJ), (8, 6): (ČRNI, TEKAČ), (8, 7): (ČRNI, KONJ), (8, 8): (ČRNI, TRDNJAVA)}
 
 # razredi figur (vsi imajo metodo poteze, ki vrne množico vseh možnih potez iz danega polja, kralj in kmet imata še metodo ogroža, ki vrne množico vseh polj, ki ju ogrožata):
 
-class R:
+class trdnjava:
 
     def __init__(self, barva, polje, svoja_polja, nasprotnikova_polja):
         self.v, self.s = polje
@@ -63,7 +75,7 @@ class R:
 
         return množica
 
-class B:
+class tekač:
 
     def __init__(self, barva, polje, svoja_polja, nasprotnikova_polja):
         self.v, self.s = polje
@@ -112,7 +124,7 @@ class B:
 
         return množica
 
-class N:
+class konj:
 
     def __init__(self, barva, polje, svoja_polja, nasprotnikova_polja):
         self.v, self.s = polje
@@ -134,7 +146,7 @@ class N:
 
         return množica
 
-class Q:
+class kraljica:
 
     def __init__(self, barva, polje, svoja_polja, nasprotnikova_polja):
         self.v, self.s = polje
@@ -143,18 +155,18 @@ class Q:
         self.svoja_polja = svoja_polja
 
     def poteze(self):
-        diagonala = B(self.barva, (self.v, self.s), self.svoja_polja, self.nasprotnikova_polja).poteze()
-        vodoravno_in_navpično = R(self.barva, (self.v, self.s), self.svoja_polja, self.nasprotnikova_polja).poteze()
+        diagonala = tekač(self.barva, (self.v, self.s), self.svoja_polja, self.nasprotnikova_polja).poteze()
+        vodoravno_in_navpično = trdnjava(self.barva, (self.v, self.s), self.svoja_polja, self.nasprotnikova_polja).poteze()
         return diagonala.union(vodoravno_in_navpično)
 
-class P:
+class kmet:
     
     def __init__(self, barva, polje, svoja_polja, nasprotnikova_polja):
         self.v, self.s = polje
         self.barva = barva
         self.nasprotnikova_polja = nasprotnikova_polja
         self.svoja_polja = svoja_polja
-        if barva == 'b':
+        if barva == BELI:
             self.premik = 1
             self.začetek = 2
         else:
@@ -190,18 +202,18 @@ class P:
 # zaradi kraljevih potez moram še pogledati ogrožena polja:
 
 def poteze(figura, polje, barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
-    if figura == 'P':
-        return P(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
-    if figura == 'R':
-        return R(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
-    if figura == 'B':
-        return B(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
-    if figura == 'N':
-        return N(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
-    if figura == 'Q':
-        return Q(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
+    if figura == KMET:
+        return kmet(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
+    if figura == TRDNJAVA:
+        return trdnjava(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
+    if figura == TEKAČ:
+        return tekač(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
+    if figura == KONJ:
+        return konj(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
+    if figura == KRALJICA:
+        return kraljica(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
     else:
-        return K(barva, polje, svoja_polja, nasprotnikova_polja, zasedena_polja).poteze()
+        return kralj(barva, polje, svoja_polja, nasprotnikova_polja, zasedena_polja).poteze()
 
 def ogrožena_polja_za(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
     množica = set()
@@ -209,18 +221,18 @@ def ogrožena_polja_za(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
     for polje in nasprotnikova_polja:
         barva, figura = zasedena_polja[polje]
 
-        if figura == 'P':
-            množica.update(P(barva, polje, svoja_polja, nasprotnikova_polja).ogroža())
+        if figura == KMET:
+            množica.update(kmet(barva, polje, nasprotnikova_polja, svoja_polja).ogroža())
 
-        elif figura == 'K':
-            množica.update(K(barva, polje, svoja_polja, nasprotnikova_polja, zasedena_polja).ogroža())
+        elif figura == KRALJ:
+            množica.update(kralj(barva, polje, nasprotnikova_polja, svoja_polja, zasedena_polja).ogroža())
 
         else: 
-            množica.update(poteze(figura, polje, barva, svoja_polja, nasprotnikova_polja, zasedena_polja))
+            množica.update(poteze(figura, polje, barva, nasprotnikova_polja, svoja_polja, zasedena_polja))
 
     return množica
 
-class K:
+class kralj:
         
     def __init__(self, barva, polje, svoja_polja, nasprotnikova_polja, zasedena_polja):
         self.v, self.s = polje
@@ -258,17 +270,17 @@ def ogroženost(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
             ogroženost += 1
     return ogroženost
 
-vrednosti_figur = {'P': 1,
-                   'N': 3,
-                   'B': 3,
-                   'R': 5,
-                   'Q': 9}
+vrednosti_figur = {KMET: 1,
+                   KONJ: 3,
+                   TEKAČ: 3,
+                   TRDNJAVA: 5,
+                   KRALJICA: 9}
 
 def vrednost(barva, svoja_polja, zasedena_polja):
     vrednost = 0
     for polje in svoja_polja:
         figura = zasedena_polja[polje][1]
-        if figura != 'K':
+        if figura != KRALJ:
             vrednost += vrednosti_figur[figura]
     return vrednost
 
@@ -279,18 +291,18 @@ def na_katerih_poljih_je(figura, barva, zasedena_polja):  # to funkcijo bom potr
     return set()
 
 def zaprtost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
-    polje = na_katerih_poljih_je('K', barva, zasedena_polja)
-    return len(K(barva, polje, svoja_polja, nasprotnikova_polja, zasedena_polja).poteze())
+    polje = na_katerih_poljih_je(KRALJ, barva, zasedena_polja)
+    return len(kralj(barva, polje, svoja_polja, nasprotnikova_polja, zasedena_polja).poteze())
 
 def ogroženost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
-    polje = na_katerih_poljih_je('K', barva, zasedena_polja)
+    polje = na_katerih_poljih_je(KRALJ, barva, zasedena_polja)
     if polje in ogrožena_polja_za(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
         return 2
     else:
         return 0
 
 def ogroženost_kraljice(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
-    polje = na_katerih_poljih_je('Q', barva, zasedena_polja)
+    polje = na_katerih_poljih_je(KRALJICA, barva, zasedena_polja)
     if polje == set():
         return 0 
     if polje in ogrožena_polja_za(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
@@ -307,43 +319,43 @@ def zasedenost_centra(barva, svoja_polja):
     return zasedenost
 
 def zmaga(nasprotnikova_barva, zasedena_polja):
-    return (nasprotnikova_barva, 'K') not in zasedena_polja.values()
+    return (nasprotnikova_barva, KRALJ) not in zasedena_polja.values()
 
 # rang kriterijev, da vem, kako utežiti kriterije pri evalvaciji:
 #   ogroženost: 0 - 16                  boljše manjše
 #   vrednost: 0 - 36                    boljše večje
 #   zaprtost_kralja: 0 - 8              boljše večje
-#   ogroženost_kralja: 0 - 1            boljše manjše  
-#   ogroženost_kraljice: 0 - 1          boljše manjše
+#   ogroženost_kralja: 0 - 2            boljše manjše  
+#   ogroženost_kraljice: 0 - 2          boljše manjše
 #   zasedenost_centra: 0 - 16           boljše večje
 
 def evalvacija(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
-    if barva == 'b':
-        nasprotna_barva = 'č'
+    if barva == BELI:
+        nasprotna_barva = ČRNI
     else:
-        nasprotna_barva = 'b'
+        nasprotna_barva = BELI
 
     evalvacija = 0
 
     evalvacija += - (ogroženost(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja))
     
-    + (vrednost(barva, svoja_polja, zasedena_polja) - vrednost(nasprotna_barva, nasprotnikova_polja, zasedena_polja)) * 3 / 4
+    + (vrednost(barva, svoja_polja, zasedena_polja) - vrednost(nasprotna_barva, nasprotnikova_polja, zasedena_polja))
     
     + (zaprtost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - zaprtost_kralja(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 2
     
-    - (ogroženost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost_kralja(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 16
+    - (ogroženost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost_kralja(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 100
     
     - (ogroženost_kraljice(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost_kraljice(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 8
     
     + (zasedenost_centra(barva, svoja_polja) - zasedenost_centra(nasprotna_barva, nasprotnikova_polja)) / 2
 
     return evalvacija
- 
+
 class igra:
 
     def __init__(self, barva, težavnost):
         self.barva = barva  # ta barva pripada računalniku
-        self.nasprotnikova_barva = {'b', 'č'}.difference({barva}).pop()  # ta barva pripada igralcu
+        self.nasprotnikova_barva = {BELI, ČRNI}.difference({barva}).pop()  # ta barva pripada igralcu
         self.postavitev = zasedena_polja
         self.svoja_polja = {polje for polje in self.postavitev if self.postavitev[polje][0] == barva}
         self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
@@ -438,8 +450,6 @@ class igra:
                                                 
     def naslednja_poteza(self, prejšnje_polje, novo_polje):
 
-        # najprej poteza, ki jo naredi igralec
-
         if prejšnje_polje not in self.nasprotnikova_polja or novo_polje not in poteze(self.postavitev[prejšnje_polje][1], prejšnje_polje, self.nasprotnikova_barva, self.nasprotnikova_polja, self.svoja_polja, self.postavitev):
             return NAPAČNA_POTEZA
 
@@ -450,8 +460,8 @@ class igra:
 
             (a, b) = self.postavitev.pop(prejšnje_polje)
 
-            if b == 'P' and novo_polje[0] == 8 or novo_polje[0] == 1:
-                self.postavitev[novo_polje] = (a, 'Q')  # kmet se spremeni v kraljico  
+            if b == KMET and novo_polje[0] == 8 or novo_polje[0] == 1:
+                self.postavitev[novo_polje] = (a, KRALJICA)  # kmet se spremeni v kraljico  
             else:
                 self.postavitev[novo_polje] = (a, b)
 
@@ -468,8 +478,8 @@ class igra:
         (prejšnje_polje, novo_polje) = self.najboljša_poteza()
         (c, d) = self.postavitev.pop(prejšnje_polje)
         
-        if d == 'P' and novo_polje[0] == 8 or novo_polje[0] == 1:
-            self.postavitev[novo_polje] = (c, 'Q')  # kmet se spremeni v kraljico  
+        if d == KMET and novo_polje[0] == 8 or novo_polje[0] == 1:
+            self.postavitev[novo_polje] = (c, KRALJICA)  # kmet se spremeni v kraljico  
         else:
             self.postavitev[novo_polje] = (c, d)
         
@@ -481,5 +491,32 @@ class igra:
             return ZMAGA
 
 def nova_igra(barva, težavnost):
-    nasprotnikova_barva = {'b', 'č'}.difference({barva}).pop()
+    nasprotnikova_barva = {BELI, ČRNI}.difference({barva}).pop()
     return igra(nasprotnikova_barva, težavnost)
+
+class sah:
+
+    def __init__(self):
+        self.igre = {}
+
+    def prost_id_igre(self):
+        if self.igre == {}:
+            return 0
+        else:
+            return max(self.igre.keys()) + 1
+
+    def nova_igra(self, barva, težavnost):
+        id_igre = self.prost_id_igre()
+        igra = nova_igra(barva, težavnost)
+        self.igre[id_igre] = ((igra, barva, težavnost), ZAČETEK)
+        return id_igre
+
+    def poteza_igralca(self, id_igre, polje, poteza):
+        igra, barva, težavnost = self.igre[id_igre][0]
+        novo_stanje = igra.naslednja_poteza(polje, poteza)
+        self.igre[id_igre][1] = (igra, barva, težavnost, novo_stanje)
+
+    def poteza_računalnika(self, id_igre):
+        igra, barva, težavnost = self.igre[id_igre][0]
+        novo_stanje = igra.poteza_računalnika()
+        self.igre[id_igre][1] = (igra, barva, težavnost, novo_stanje)

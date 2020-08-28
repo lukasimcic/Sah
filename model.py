@@ -161,11 +161,12 @@ class kraljica:
 
 class kmet:
     
-    def __init__(self, barva, polje, svoja_polja, nasprotnikova_polja):
+    def __init__(self, barva, polje, svoja_polja, nasprotnikova_polja, zasedena_polja):
         self.v, self.s = polje
         self.barva = barva
         self.nasprotnikova_polja = nasprotnikova_polja
         self.svoja_polja = svoja_polja
+        self.zasedena_polja = zasedena_polja
         if barva == BELI:
             self.premik = 1
             self.začetek = 2
@@ -191,7 +192,7 @@ class kmet:
 
         if self.v == self.začetek:
             množica.update({(self.začetek + self.premik, self.s)})
-            if (self.začetek + self.premik) not in self.svoja_polja:
+            if (self.začetek + 2 * self.premik, self.s) not in zasedena_polja:
                 množica.update({(self.začetek + 2 * self.premik, self.s)})
 
         else:
@@ -203,7 +204,7 @@ class kmet:
 
 def poteze(figura, polje, barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
     if figura == KMET:
-        return kmet(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
+        return kmet(barva, polje, svoja_polja, nasprotnikova_polja, zasedena_polja).poteze()
     if figura == TRDNJAVA:
         return trdnjava(barva, polje, svoja_polja, nasprotnikova_polja).poteze()
     if figura == TEKAČ:
@@ -222,7 +223,7 @@ def ogrožena_polja_za(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
         barva, figura = zasedena_polja[polje]
 
         if figura == KMET:
-            množica.update(kmet(barva, polje, nasprotnikova_polja, svoja_polja).ogroža())
+            množica.update(kmet(barva, polje, nasprotnikova_polja, svoja_polja, zasedena_polja).ogroža())
 
         elif figura == KRALJ:
             množica.update(kralj(barva, polje, nasprotnikova_polja, svoja_polja, zasedena_polja).ogroža())
@@ -337,17 +338,17 @@ def evalvacija(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
 
     evalvacija = 0
 
-    evalvacija += - (ogroženost(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja))
+    evalvacija += - ogroženost(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) + ogroženost(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)
     
-    + (vrednost(barva, svoja_polja, zasedena_polja) - vrednost(nasprotna_barva, nasprotnikova_polja, zasedena_polja))
+    evalvacija += (vrednost(barva, svoja_polja, zasedena_polja) - vrednost(nasprotna_barva, nasprotnikova_polja, zasedena_polja)) * 2
     
-    + (zaprtost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - zaprtost_kralja(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 2
+    evalvacija += (zaprtost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - zaprtost_kralja(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) / 2
     
-    - (ogroženost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost_kralja(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 100
+    evalvacija += - (ogroženost_kralja(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost_kralja(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 4
     
-    - (ogroženost_kraljice(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost_kraljice(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 8
+    evalvacija += - (ogroženost_kraljice(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) - ogroženost_kraljice(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)) * 3
     
-    + (zasedenost_centra(barva, svoja_polja) - zasedenost_centra(nasprotna_barva, nasprotnikova_polja)) / 2
+    evalvacija += (zasedenost_centra(barva, svoja_polja) - zasedenost_centra(nasprotna_barva, nasprotnikova_polja)) / 4
 
     return evalvacija
 
@@ -370,7 +371,6 @@ class igra:
             figura = self.postavitev[polje][1]
 
             for poteza in poteze(figura, polje, self.barva, self.svoja_polja, self.nasprotnikova_polja, self.postavitev):
-                #print(polje, poteza)
 
                 nova_postavitev = self.postavitev.copy()
                 par = nova_postavitev.pop(polje)
@@ -385,13 +385,13 @@ class igra:
                 ocena = evalvacija(self.barva, nova_svoja_polja, nova_nasprotnikova_polja, nova_postavitev)
 
                 if self.težavnost > 1:
-                    
+                    končna_ocena1 = 1000   # to bo evalvacija najslabse mozne poteze igralca za računalnik, ko igralec igra iz nove postavitve (raven 2) 
+
                     for polje1 in nova_nasprotnikova_polja:
                         figura = nova_postavitev[polje1][1]
 
                         for poteza1 in poteze(figura, polje1, self.nasprotnikova_barva, nova_nasprotnikova_polja, nova_svoja_polja, nova_postavitev):
-                            #print('    ', polje1, poteza1)
-                
+
                             nova_postavitev1 = nova_postavitev.copy()
                             par1 = nova_postavitev1.pop(polje1)
                             nova_postavitev1[poteza1] = par1
@@ -404,16 +404,17 @@ class igra:
                                 ocena2 = 0
                                 test = False
 
-                            else:
+                            if self.težavnost == 2:
                                 ocena1 = evalvacija(self.barva, nova_svoja_polja1, nova_nasprotnikova_polja1, nova_postavitev1)
+                                končna_ocena1 = min(končna_ocena1, ocena1)  # najslabši mozen odziv igralca
 
                             if self.težavnost == 3 and test:
-                                
+                                končna_ocena2 = -1000   # to bo evalvacija najboljše možne poteze računalnika, po tem ko se je igralec že odzval na potezo računalnika
+
                                 for polje2 in nova_svoja_polja1:
                                     figura = nova_postavitev1[polje2][1]
 
                                     for poteza2 in poteze(figura, polje2, self.barva, nova_svoja_polja1, nova_nasprotnikova_polja1, nova_postavitev1):
-                                        #print('        ', polje2, poteza2)
 
                                         nova_postavitev2 = nova_postavitev1.copy()
                                         par2 = nova_postavitev2.pop(polje2)
@@ -427,19 +428,13 @@ class igra:
                                         else:
                                             ocena2 = evalvacija(self.barva, nova_svoja_polja2, nova_nasprotnikova_polja2, nova_postavitev2)
 
-                                        # ali je ta poteza najboljša do sedaj?
+                                        končna_ocena2 = max(končna_ocena2, ocena2)
+                                
+                                končna_ocena1 = min(končna_ocena2, končna_ocena1)
 
-                                        končna_ocena = ocena + ocena1 + ocena2
-                                        if najboljša_ocena < končna_ocena:
-                                            iskano_polje, iskana_poteza = polje, poteza
-                                            najboljša_ocena = končna_ocena
-
-                            else:
-                                končna_ocena = ocena + ocena1
-                                if najboljša_ocena < končna_ocena:
-                                    iskano_polje, iskana_poteza = polje, poteza
-                                    najboljša_ocena = končna_ocena
-
+                    if najboljša_ocena < končna_ocena1:
+                        iskano_polje, iskana_poteza = polje, poteza
+                        najboljša_ocena = končna_ocena1
 
                 else:
                     if najboljša_ocena < ocena:

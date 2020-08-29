@@ -336,6 +336,11 @@ def evalvacija(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
     else:
         nasprotna_barva = BELI
 
+    if zmaga(nasprotna_barva, zasedena_polja):
+        return 30
+    if zmaga(barva, zasedena_polja):
+        return -30
+    
     evalvacija = 0
 
     evalvacija += - ogroženost(barva, svoja_polja, nasprotnikova_polja, zasedena_polja) + ogroženost(nasprotna_barva, nasprotnikova_polja, svoja_polja, zasedena_polja)
@@ -365,7 +370,6 @@ class igra:
     def najboljša_poteza(self):
         najboljša_ocena = self.težavnost * (-100)
         iskano_polje, iskana_poteza = 0, 0
-        test = True # ta test se uporabi v primeru, da je v drugem koraku računalnikovega razmišljanja pojeden kralj
 
         for polje in self.svoja_polja:
             figura = self.postavitev[polje][1]
@@ -399,16 +403,11 @@ class igra:
                             nova_svoja_polja1 = {polje for polje in nova_postavitev1 if nova_postavitev1[polje][0] == self.barva}
                             nova_nasprotnikova_polja1 = set(nova_postavitev1.keys()).difference(nova_svoja_polja1)  # ker je lahko kakšna nasprotnikova figura pojedena
 
-                            if zmaga(self.barva, nova_postavitev1):
-                                ocena1 = -101
-                                ocena2 = 0
-                                test = False
-
                             if self.težavnost == 2:
                                 ocena1 = evalvacija(self.barva, nova_svoja_polja1, nova_nasprotnikova_polja1, nova_postavitev1)
                                 končna_ocena1 = min(končna_ocena1, ocena1)  # najslabši mozen odziv igralca
 
-                            if self.težavnost == 3 and test:
+                            if self.težavnost == 3:
                                 končna_ocena2 = -1000   # to bo evalvacija najboljše možne poteze računalnika, po tem ko se je igralec že odzval na potezo računalnika
 
                                 for polje2 in nova_svoja_polja1:

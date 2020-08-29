@@ -31,7 +31,6 @@ def izpis_zmage(igra):
     return f'Čestitam! Premagal si računalnik s težavnostno stopnjo {igra.težavnost}'
 
 def izpis_igre(igra):
-    print(igra.postavitev)
     return mreža(igra.postavitev)
 
 def izpis_napačne_poteze(igra):
@@ -76,7 +75,6 @@ def poženi():
         
         polje, poteza = zahtevaj_vnos(igra)
         stanje = igra.naslednja_poteza(polje, poteza)
-        print(igra.postavitev)
 
         while stanje == model.NAPAČNA_POTEZA:
             print(izpis_napačne_poteze(igra))

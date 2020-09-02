@@ -10,7 +10,6 @@ KRALJ = 'K'
 
 ZMAGA = 'W'
 PORAZ = 'X'
-REMI = 'O'
 
 NAPAČNA_POTEZA = 'xx'
 
@@ -18,7 +17,7 @@ ZAČETEK = 'S'
 
 # začetno stanje:
 
-zasedena_polja = { (1, 1): (BELI, TRDNJAVA), (1, 2): (BELI, KONJ), (1, 3): (BELI, TEKAČ), (1, 4): (BELI, KRALJICA), (1, 5): (BELI, KRALJ), (1, 6): (BELI, TEKAČ), (1, 7): (BELI, KONJ), (1, 8): (BELI, TRDNJAVA),
+začetna_polja = { (1, 1): (BELI, TRDNJAVA), (1, 2): (BELI, KONJ), (1, 3): (BELI, TEKAČ), (1, 4): (BELI, KRALJICA), (1, 5): (BELI, KRALJ), (1, 6): (BELI, TEKAČ), (1, 7): (BELI, KONJ), (1, 8): (BELI, TRDNJAVA),
 (2, 1): (BELI, KMET), (2, 2): (BELI, KMET), (2, 3): (BELI, KMET), (2, 4): (BELI, KMET), (2, 5): (BELI, KMET), (2, 6): (BELI, KMET), (2, 7): (BELI, KMET), (2, 8): (BELI, KMET),
 (7, 1): (ČRNI, KMET), (7, 2): (ČRNI, KMET), (7, 3): (ČRNI, KMET), (7, 4): (ČRNI, KMET), (7, 5): (ČRNI, KMET), (7, 6): (ČRNI, KMET), (7, 7): (ČRNI, KMET), (7, 8): (ČRNI, KMET),
 (8, 1): (ČRNI, TRDNJAVA), (8, 2): (ČRNI, KONJ), (8, 3): (ČRNI, TEKAČ), (8, 4): (ČRNI, KRALJICA), (8, 5): (ČRNI, KRALJ), (8, 6): (ČRNI, TEKAČ), (8, 7): (ČRNI, KONJ), (8, 8): (ČRNI, TRDNJAVA)}
@@ -187,12 +186,12 @@ class kmet:
         if (self.v + self.premik, self.s + 1) in self.nasprotnikova_polja:
             množica.update({(self.v + self.premik, self.s + 1)})
 
-        if (self.v + self.premik, self.s) in zasedena_polja:
+        if (self.v + self.premik, self.s) in self.zasedena_polja:
             return množica
 
         if self.v == self.začetek:
             množica.update({(self.začetek + self.premik, self.s)})
-            if (self.začetek + 2 * self.premik, self.s) not in zasedena_polja:
+            if (self.začetek + 2 * self.premik, self.s) not in self.zasedena_polja:
                 množica.update({(self.začetek + 2 * self.premik, self.s)})
 
         else:
@@ -337,9 +336,9 @@ def evalvacija(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
         nasprotna_barva = BELI
 
     if zmaga(nasprotna_barva, zasedena_polja):
-        return 30
+        return 100
     if zmaga(barva, zasedena_polja):
-        return -30
+        return -100
     
     evalvacija = 0
 
@@ -359,12 +358,14 @@ def evalvacija(barva, svoja_polja, nasprotnikova_polja, zasedena_polja):
 
 class igra:
 
-    def __init__(self, barva, težavnost):
+    def __init__(self, barva, težavnost, stanje=None):
         self.barva = barva  # ta barva pripada računalniku
         self.nasprotnikova_barva = {BELI, ČRNI}.difference({barva}).pop()  # ta barva pripada igralcu
+        if stanje == ZAČETEK:
+            zasedena_polja = začetna_polja.copy()
         self.postavitev = zasedena_polja
         self.svoja_polja = {polje for polje in self.postavitev if self.postavitev[polje][0] == barva}
-        self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
+        self.nasprotnikova_polja = set(self.postavitev.keys()).difference(self.svoja_polja)
         self.težavnost = težavnost
 
     def najboljša_poteza(self):
@@ -447,24 +448,21 @@ class igra:
         if prejšnje_polje not in self.nasprotnikova_polja or novo_polje not in poteze(self.postavitev[prejšnje_polje][1], prejšnje_polje, self.nasprotnikova_barva, self.nasprotnikova_polja, self.svoja_polja, self.postavitev):
             return NAPAČNA_POTEZA
 
-        elif prejšnje_polje == 0:
-            return REMI
-
         else:
 
             (a, b) = self.postavitev.pop(prejšnje_polje)
 
-            if b == KMET and novo_polje[0] == 8 or novo_polje[0] == 1:
+            if b == KMET and (novo_polje[0] == 8 or novo_polje[0] == 1):
                 self.postavitev[novo_polje] = (a, KRALJICA)  # kmet se spremeni v kraljico  
             else:
                 self.postavitev[novo_polje] = (a, b)
 
             self.svoja_polja = {polje for polje in self.postavitev if self.postavitev[polje][0] == self.barva}
-            self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
+            self.nasprotnikova_polja = set(self.postavitev.keys()).difference(self.svoja_polja)
 
-            if zmaga(self.nasprotnikova_barva, zasedena_polja):
+            if zmaga(self.nasprotnikova_barva, self.postavitev):
                 return PORAZ
-            if zmaga(self.barva, zasedena_polja):
+            if zmaga(self.barva, self.postavitev):
                 return ZMAGA
 
     def poteza_računalnika(self):       
@@ -478,15 +476,15 @@ class igra:
             self.postavitev[novo_polje] = (c, d)
         
         self.svoja_polja = {polje for polje in self.postavitev if self.postavitev[polje][0] == self.barva}
-        self.nasprotnikova_polja = set(zasedena_polja.keys()).difference(self.svoja_polja)
-        if zmaga(self.nasprotnikova_barva, zasedena_polja):
+        self.nasprotnikova_polja = set(self.postavitev.keys()).difference(self.svoja_polja)
+        if zmaga(self.nasprotnikova_barva, self.postavitev):
             return PORAZ
-        if zmaga(self.barva, zasedena_polja):
+        if zmaga(self.barva, self.postavitev):
             return ZMAGA
 
 def nova_igra(barva, težavnost):
     nasprotnikova_barva = {BELI, ČRNI}.difference({barva}).pop()
-    return igra(nasprotnikova_barva, težavnost)
+    return igra(nasprotnikova_barva, težavnost, ZAČETEK)
 
 class sah:
 
@@ -502,15 +500,16 @@ class sah:
     def nova_igra(self, barva, težavnost):
         id_igre = self.prost_id_igre()
         igra = nova_igra(barva, težavnost)
-        self.igre[id_igre] = ((igra, barva, težavnost), ZAČETEK)
+        self.igre[id_igre] = (igra, ZAČETEK)
         return id_igre
 
     def poteza_igralca(self, id_igre, polje, poteza):
-        igra, barva, težavnost = self.igre[id_igre][0]
+        igra = self.igre[id_igre][0]
         novo_stanje = igra.naslednja_poteza(polje, poteza)
-        self.igre[id_igre][1] = (igra, barva, težavnost, novo_stanje)
+        self.igre[id_igre] = igra, novo_stanje
+        return novo_stanje
 
     def poteza_računalnika(self, id_igre):
-        igra, barva, težavnost = self.igre[id_igre][0]
+        igra = self.igre[id_igre][0]
         novo_stanje = igra.poteza_računalnika()
-        self.igre[id_igre][1] = (igra, barva, težavnost, novo_stanje)
+        self.igre[id_igre] = igra, novo_stanje

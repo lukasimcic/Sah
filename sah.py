@@ -41,14 +41,15 @@ slovar = {
     'g': 7,
     'h': 8}
 
-def vnos_v_nabor(vnos):   # vnos je oblike '2, c'
+def vnos_v_nabor(vnos):   # vnos mora biti oblike '2, c' ali '2,c'
     sez = []
-    if vnos[0].isnumeric():
-        sez.append(int(vnos[0]))
-        if vnos[3] in 'abcdefgh':
-            sez.append(slovar[vnos[3].lower()])
-            if len(vnos) == 4:
-                return tuple(sez)
+    if len(vnos) in {3, 4}:
+        if vnos[0].isnumeric():
+            sez.append(int(vnos[0]))
+            if vnos[-1] in 'abcdefgh':
+                sez.append(slovar[vnos[-1].lower()])
+                if vnos[1:-1] in {',', ', '}:
+                    return tuple(sez)
     else:
         return None
 

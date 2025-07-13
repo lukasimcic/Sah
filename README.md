@@ -8,4 +8,11 @@ Vključuje dva vmesnika. Tekstovni se odziva neposredno na vaše odgovore na ter
 
 ## Navodila za zagon
 
-Ko prenesete vse datoteke na svoj računalnik, v naloženi mapi zaženite datoteko sah.py. Za prikaz spletnega vmesnika sledite spletnemu naslovu, ki bo izpisan na terminalu.
+Poženite ukaze
+
+```
+pip install -r requirements.txt
+python sah.py
+```
+
+in sledite spletnemu naslovu, ki bo izpisan na terminalu.
